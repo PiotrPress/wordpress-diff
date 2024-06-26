@@ -1,0 +1,29 @@
+{
+    "name": "piotrpress/wordpress-diff",
+    "type": "project",
+    "license": "MIT",
+    "description": "WordPress Diff is a command line tool for comparing contents of two WordPress installations using REST API and outputting the differences to HTML files for easy comparison.",
+    "homepage": "https://github.com/PiotrPress/wordpress-diff",
+    "authors": [
+        {
+            "name": "Piotr Niewiadomski",
+            "homepage": "https://piotr.press"
+        }
+    ],
+    "keywords": [ "wordpress", "wp", "diff" ],
+    "require": {
+        "guzzlehttp/guzzle": "7.8.1",
+        "symfony/console": "7.1.1",
+        "symfony/filesystem": "7.1.1",
+        "jfcherng/php-diff": "6.16.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "PiotrPress\\WordPress\\Diff\\": "src/"
+        },
+        "classmap": [ "src" ]
+    },
+    "scripts": {
+        "post-install-cmd": "chmod +x wp-diff"
+    }
+}

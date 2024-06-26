@@ -1,0 +1,49 @@
+#!/usr/bin/env php
+<?php declare( strict_types = 1 );
+
+namespace PiotrPress\WordPress\Diff;
+
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\SingleCommandApplication;
+use Symfony\Component\Filesystem\Filesystem;
+
+require __DIR__ . '/vendor/autoload.php';
+
+exit( ( new SingleCommandApplication() )
+    ->setName( 'WordPress Diff' )
+    ->setVersion( '1.0.0' )
+    ->addArgument( 'old-site', InputArgument::REQUIRED )
+    ->addArgument( 'new-site', InputArgument::REQUIRED )
+    ->addOption( 'exclude-type', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY )
+    ->addOption( 'exclude-post', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY )
+    ->setCode( function( InputInterface $input, OutputInterface $output ) : int {
+        $fileSystem = new Filesystem();
+        $outputDir = __DIR__ . '/output';
+        if( $fileSystem->exists( $outputDir ) )
+            $fileSystem->remove( $outputDir );
+        $fileSystem->mkdir( $outputDir );
+
+        $oldSite = ( new Site( $input->getArgument( 'old-site' ) ) );
+        $newSite = ( new Site( $input->getArgument( 'new-site' ) ) );
+
+        $oldPosts = $oldSite->getPosts( $input->getOption( 'exclude-type' ), $input->getOption( 'exclude-post' ) );
+        $newPosts = $newSite->getPosts( $input->getOption( 'exclude-type' ), $input->getOption( 'exclude-post' ) );
+
+        $diffTypes = \array_keys( \array_diff_key( $oldPosts, $newPosts ) );
+        $output->writeln( 'Missing types: ' . \print_r( $diffTypes, true ) );
+
+        foreach( Site::exclude( $oldPosts, $diffTypes ) as $type => $posts ) {
+            if( $diffPosts = \array_keys( \array_diff_key( $posts, $newPosts[ $type ] ) ) )
+                $output->writeln( 'Missing posts: ' . \print_r( \array_map( fn( $value ) => $newSite->getUrl() . $value, $diffPosts ), true ) );
+
+            foreach( Site::exclude( $posts, $diffPosts ) as $link => $content )
+                $fileSystem->dumpFile( $outputDir . \rtrim( $link, '/' ) . '.html', ( new Diff( $content, $newPosts[ $type ][ $link ] ) )->getHTML() );
+        }
+
+        return Command::SUCCESS;
+    } )
+    ->run() );
