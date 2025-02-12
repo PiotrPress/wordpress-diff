@@ -34,7 +34,8 @@ The `--exclude-type` and `--exclude-post` options are used to exclude post types
 
 ## Requirements
 
-PHP ^`8.3` version.
+- [Docker](https://www.docker.com/)
+- [Docker Compose](https://docs.docker.com/compose/)
 
 ## License
 

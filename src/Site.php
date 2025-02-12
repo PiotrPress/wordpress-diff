@@ -22,7 +22,7 @@ class Site {
 
     public function getPosts( array $excludeTypes = [], array $excludePosts = [] ) : array {
         $types = \array_map( fn( $value ) => $value[ 'rest_base' ], $this->request( 'types' ) );
-        $types = self::exclude( $types, [ 'revision', 'attachment', 'nav_menu_item', 'wp_block', 'wp_template', 'wp_template_part', 'wp_navigation', 'wp_font_family', 'wp_font_face' ] );
+        $types = self::exclude( $types, [ 'revision', 'attachment', 'nav_menu_item', 'wp_block', 'wp_template', 'wp_template_part', 'wp_navigation', 'wp_font_family', 'wp_font_face', 'wp_global_styles' ] );
         $types = self::exclude( $types, $excludeTypes );
 
         $data = [];
